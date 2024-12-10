@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Hide and Seek - Title Screen.unity
+    guid: b08c6deea41519e40bd327be3b435267
+  - enabled: 1
+    path: Assets/Scenes/TestScene.unity
+    guid: 4e5d7075d96a59542b69aea3de9d73fa
+  - enabled: 1
+    path: Assets/Scenes/Main Game.unity
+    guid: c0913943b7661cb41a72004460093279
+  - enabled: 1
+    path: Assets/Scenes/About.unity
+    guid: 67a834498885d9847813365dd6f01ea9
+  - enabled: 1
+    path: Assets/Scenes/Rules.unity
+    guid: f48ef597e3f978947a6c45b1f680495a
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2a61ef6b2e0a4bf448f54ab7cb46a2e9, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: cc6360f6d01fa894398c26b937a4a3fe, type: 2}
