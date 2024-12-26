@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class DualInputController : MonoBehaviour
 {
     public Transform playerBody;   // Reference to the player's body (Capsule)
     public Transform playerCamera; // Manually assigned camera
     public CharacterController characterController; // CharacterController for smooth movement
-    public float mouseSensitivity = 100f;
     public float moveSpeed = 5f;   // Speed of player movement
-    public float vrLookSensitivity = 1f;
+    public float rotationSpeed = 100f;  // Rotation speed for joystick input
 
     private float xRotation = 0f;  // Tracks vertical rotation (looking up/down)
     private bool isVRActive;
@@ -37,30 +37,16 @@ public class DualInputController : MonoBehaviour
 
         if (isVRActive)
         {
-            HandleVRLook();
+            HandleVRLook(); // Handle VR head look
             HandleVRMovement();
         }
         else
         {
-            HandleMouseLook();
-            HandleKeyboardMovement();
+            HandleKeyboardMovement(); // Non-VR controls (keyboard)
         }
     }
 
-    // Handle mouse look
-    void HandleMouseLook()
-    {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -70f, 70f);
-
-        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        playerBody.Rotate(Vector3.up * mouseX);
-    }
-
-    // Handle keyboard movement
+    // Handle keyboard movement for non-VR (testing purposes)
     void HandleKeyboardMovement()
     {
         // Get input for movement
@@ -74,26 +60,37 @@ public class DualInputController : MonoBehaviour
         characterController.Move(move * moveSpeed * Time.deltaTime);
     }
 
-    // Handle VR look
+    // Handle VR head look (headset rotation controls both body and camera)
     void HandleVRLook()
     {
-        Quaternion headRotation;
         InputDevice headDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-        if (headDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out headRotation))
-        {
-            Vector3 euler = headRotation.eulerAngles * vrLookSensitivity;
-            xRotation = Mathf.Clamp(euler.x, -70f, 70f);
+        Quaternion headRotation;
 
+        // Check if the device is valid and get the rotation from the headset
+        if (headDevice.isValid && headDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out headRotation))
+        {
+            // Extract the rotation in Euler angles
+            Vector3 eulerAngles = headRotation.eulerAngles;
+
+            // Apply the yaw (horizontal rotation) to the player body (rotate the body)
+            float headYaw = eulerAngles.y; // Yaw is the horizontal rotation
+            playerBody.rotation = Quaternion.Euler(0f, headYaw, 0f); // Rotate the player body based on yaw
+
+            // Apply the pitch (vertical rotation) to the camera (up/down look)
+            xRotation = eulerAngles.x; // Pitch is the vertical rotation
+            xRotation = Mathf.Clamp(xRotation, -70f, 70f); // Limit vertical rotation to avoid upside-down view
             playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-            playerBody.localRotation = Quaternion.Euler(0f, euler.y, 0f);
+
+            // Debugging: Print the head rotation values
+            // Debug.Log("Head Rotation: " + eulerAngles);
         }
         else
         {
-            Debug.LogWarning("Failed to get VR headset rotation.");
+            Debug.LogWarning("Failed to retrieve VR headset rotation.");
         }
     }
 
-    // Handle VR movement
+    // Handle VR movement using the left joystick
     void HandleVRMovement()
     {
         InputDevice leftHandDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
@@ -109,4 +106,3 @@ public class DualInputController : MonoBehaviour
         }
     }
 }
-
